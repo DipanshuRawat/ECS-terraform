@@ -1,49 +1,57 @@
-name: Build and Deploy to ECS
+name: Deploy MedusaJS to AWS ECS
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main  # Change to your deployment branch
 
 env:
-  AWS_REGION: ${{ secrets.AWS_REGION }}
-  ECR_REPOSITORY: medusa-app
-  ECS_CLUSTER: medusa-cluster
-  ECS_SERVICE: medusa-service
-  CONTAINER_NAME: medusa
+  AWS_REGION: us-east-2  # Change to your AWS region
+  ECR_REPOSITORY: medusa-repo  # Change to your ECR repository name
+  ECS_CLUSTER: medusa-cluster  # Change to your ECS cluster name
+  ECS_SERVICE: medusa-service  # Change to your ECS service name
+  ECS_TASK_DEFINITION: medusa-task-def.json  # Task definition file
 
 jobs:
   deploy:
+    name: Deploy to AWS ECS
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Configure AWS credentials
+      - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-2
+          aws-region: ${{ env.AWS_REGION }}
 
-      - name: Log in to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
-
-      - name: Build and push Docker image
-        id: build-image
+      - name: Login to Amazon ECR
         run: |
-          IMAGE_TAG=${{ github.sha }}
-          IMAGE_URI=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:$IMAGE_TAG
-          
+          ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
+          aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+
+      - name: Build, Tag, and Push Docker Image
+        run: |
+          ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
+          IMAGE_URI=$ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:latest
           docker build -t $IMAGE_URI .
           docker push $IMAGE_URI
 
-          echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
+      - name: Update ECS Task Definition
+        id: update-task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: ${{ env.ECS_TASK_DEFINITION }}
+          container-name: medusa-container
+          image: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
 
-      - name: Update ECS service
-        run: |
-          aws ecs update-service \
-            --cluster $ECS_CLUSTER \
-            --service $ECS_SERVICE \
-            --force-new-deployment
+      - name: Deploy to Amazon ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.update-task-def.outputs.task-definition }}
+          service: ${{ env.ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
