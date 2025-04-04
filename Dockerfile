@@ -1,23 +1,19 @@
-# Use official Node.js image
-FROM node:16.20.1
-
-# Set the working directory
-WORKDIR /app
+FROM node:18
 
 # Install Medusa CLI
 RUN npm install -g @medusajs/medusa-cli
 
-# Create a new Medusa project
-RUN medusa new my-medusa-store --seed
+# Create Medusa project without prompts
+RUN yes | medusa new my-medusa-store --seed --no-telemetry
 
-# Move into the project directory
-WORKDIR /app/my-medusa-store
+# Set working directory
+WORKDIR /my-medusa-store
 
 # Install dependencies
 RUN npm install
 
-# Expose Medusa's default port
+# Expose port
 EXPOSE 9000
 
-# Start Medusa server
+# Start the Medusa server
 CMD ["npm", "run", "start"]
