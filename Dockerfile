@@ -15,7 +15,7 @@ RUN npm install --legacy-peer-deps  # Fix dependency conflicts
 COPY . .
 
 # Expose Medusa's default port
-EXPOSE 9000
+EXPOSE 80
 
 # Start Medusa server
 CMD ["npm", "run", "start"]
