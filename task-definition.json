@@ -7,7 +7,7 @@
   "memory": "1024",
   "containerDefinitions": [
     {
-      "name": "medusa-container",
+      "name": "medusa",
       "image": "YOUR_ECR_REPO_URL:latest",
       "essential": true,
       "portMappings": [
