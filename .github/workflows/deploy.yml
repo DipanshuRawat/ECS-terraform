@@ -40,6 +40,13 @@ jobs:
           docker build -t $IMAGE_URI .
           docker push $IMAGE_URI
 
+      - name: Terraform Init, Validate, Plan, and Apply
+        run: |
+          terraform init
+          terraform validate
+          terraform plan
+          terraform apply --auto-approve
+
       - name: Update ECS Task Definition
         id: update-task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
