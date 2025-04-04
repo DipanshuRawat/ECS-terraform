@@ -8,12 +8,13 @@
   "containerDefinitions": [
     {
       "name": "medusa",
-      "image": "${aws_ecr_repository.medusa_repo.repository_url}:latest",
+      "image": "376129882686.dkr.ecr.us-east-2.amazonaws.com/medusa-repo:latest",
       "essential": true,
       "portMappings": [
         {
-          containerPort = 9000,
-          hostPort      = 9000
+          "containerPort": 9000,
+          "hostPort": 9000,
+          "protocol": "tcp"
         }
       ]
     }
