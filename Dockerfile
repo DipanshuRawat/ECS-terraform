@@ -1,19 +1,13 @@
-FROM node:18
+FROM node:16.20.1
 
-# Install Medusa CLI
-RUN npm install -g @medusajs/medusa-cli
+WORKDIR /app
 
-# Create Medusa project without prompts
-RUN yes | medusa new my-medusa-store --seed --no-telemetry
+COPY package.json ./
 
-# Set working directory
-WORKDIR /my-medusa-store
-
-# Install dependencies
 RUN npm install
 
-# Expose port
-EXPOSE 9000
+COPY . .
 
-# Start the Medusa server
+EXPOSE 5000
+
 CMD ["npm", "run", "start"]
