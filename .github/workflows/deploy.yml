@@ -47,10 +47,12 @@ jobs:
 
       - name: Terraform Init, Validate, Plan, and Apply
         run: |
+          cd medusa  # Change to the correct directory where Terraform files exist
           terraform init
           terraform validate
           terraform plan
           terraform apply --auto-approve
+
 
       - name: Update ECS Task Definition
         id: update-task-def
