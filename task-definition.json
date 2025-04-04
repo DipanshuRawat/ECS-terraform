@@ -8,7 +8,7 @@
   "containerDefinitions": [
     {
       "name": "medusa",
-      "image": "YOUR_ECR_REPO_URL:latest",
+      "image": "${aws_ecr_repository.medusa_repo.repository_url}:latest",
       "essential": true,
       "portMappings": [
         {
