@@ -28,6 +28,11 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.5.7  # You can change to the version you prefer
+
       - name: Login to Amazon ECR
         run: |
           ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
