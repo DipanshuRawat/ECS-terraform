@@ -1,0 +1,21 @@
+{
+  "family": "medusa-task",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "executionRoleArn": "arn:aws:iam::376129882686:role/ecsTaskExecutionRole",
+  "cpu": "512",
+  "memory": "1024",
+  "containerDefinitions": [
+    {
+      "name": "medusa-container",
+      "image": "YOUR_ECR_REPO_URL:latest",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 9000,
+          "hostPort": 9000
+        }
+      ]
+    }
+  ]
+}
